@@ -1,7 +1,12 @@
 // Track login state (initially false)
 let isLoggedIn = false;
 
-// Add event listener for login and signup button clicks
+// DOM elements for auth buttons
+const loginBtn = document.getElementById('loginBtn');
+const signupBtn = document.getElementById('signupBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+// Add event listener for login, signup, and other button clicks
 document.addEventListener('click', function(event) {
     // If not logged in, show a popup when clicking on anywhere except login or signup buttons
     if (!isLoggedIn) {
@@ -28,57 +33,47 @@ function checkSession() {
             if (data.loggedIn) {
                 // User is logged in, set isLoggedIn flag to true
                 isLoggedIn = true;
+                updateAuthButtons(); // Update button visibility
                 removeBlur(); // Remove blur effects from specific elements
             } else {
                 // User is not logged in, apply the blur
                 applyBlur();
                 isLoggedIn = false;
+                updateAuthButtons(); // Update button visibility
             }
         })
         .catch(error => console.error('Error checking session:', error));
 }
 
-// Show popup alert
-// function showPopup(message) {
-//     const popup = document.createElement('div');
-//     popup.className = 'popup'; // Add a class for styling
-//     popup.innerText = message;
+// Function to toggle visibility of auth buttons
+function updateAuthButtons() {
+    if (isLoggedIn) {
+        loginBtn.style.display = 'none';
+        signupBtn.style.display = 'none';
+        logoutBtn.style.display = 'block';
+    } else {
+        loginBtn.style.display = 'block';
+        signupBtn.style.display = 'block';
+        logoutBtn.style.display = 'none';
+    }
+}
 
-//     // Append the popup to the body
-//     document.body.appendChild(popup);
-
-//     // Remove the popup after a few seconds
-//     setTimeout(() => {
-//         popup.remove();
-//     }, 5000); // Popup will disappear after 3 seconds
-// }
-
-// Show popup alert
+// Show popup alert with stacking effect
 function showPopup(message) {
-    // Create the overlay
     const overlay = document.createElement('div');
-    overlay.className = 'popup-overlay'; // Add a class for styling the overlay
+    overlay.className = 'popup-overlay';
 
-    // Create the popup container
     const popup = document.createElement('div');
-    popup.className = 'popup-container'; // Add a class for styling the popup
+    popup.className = 'popup-container';
 
-    // Create the close button
     const closeBtn = document.createElement('span');
     closeBtn.className = 'popup-close';
-    closeBtn.innerHTML = '&times;'; // Close icon (×)
+    closeBtn.innerHTML = '&times;';
 
-    // Close the popup when the close button or overlay is clicked
     closeBtn.onclick = function() {
-        document.body.removeChild(overlay);
-    };
-    overlay.onclick = function(event) {
-        if (event.target === overlay) {
-            document.body.removeChild(overlay);
-        }
+        overlay.remove();
     };
 
-    // Create the popup message content
     const content = document.createElement('div');
     content.className = 'popup-content';
     content.innerHTML = `
@@ -89,44 +84,35 @@ function showPopup(message) {
         </div>
     `;
 
-    // Append the close button and content to the popup container
     popup.appendChild(closeBtn);
     popup.appendChild(content);
-
-    // Append the popup to the overlay
     overlay.appendChild(popup);
-
-    // Append the overlay to the body
     document.body.appendChild(overlay);
 }
 
-
 // Apply blur effect to necessary elements except for specific headers
 function applyBlur() {
-    const dayForecastElement = document.querySelector('.day-forecast'); // Select 5-day forecast
-    const hourlyForecast = document.querySelector('.hourly-forecast'); // Select hourly forecast
-    const weatherRightContent = document.querySelectorAll('.weather-right > *:not(h2)'); // Select all elements in weather-right except <h2>
+    const dayForecastElement = document.querySelector('.day-forecast');
+    const hourlyForecast = document.querySelector('.hourly-forecast');
+    const weatherRightContent = document.querySelectorAll('.weather-right > *:not(h2)');
 
-    // Apply blur to day-forecast section
     if (dayForecastElement) {
         dayForecastElement.style.filter = 'blur(8px)';
-        dayForecastElement.style.pointerEvents = 'none'; // Disable interaction
-        dayForecastElement.classList.add('blurred-area'); // Add a class for event listener
+        dayForecastElement.style.pointerEvents = 'none';
+        dayForecastElement.classList.add('blurred-area');
     }
 
-    // Apply blur to hourly forecast
     if (hourlyForecast) {
         hourlyForecast.style.filter = 'blur(8px)';
-        hourlyForecast.style.pointerEvents = 'none'; // Disable interaction
-        hourlyForecast.classList.add('blurred-area'); // Add a class for event listener
+        hourlyForecast.style.pointerEvents = 'none';
+        hourlyForecast.classList.add('blurred-area');
     }
 
-    // Apply blur to all children of .weather-right except h2
     if (weatherRightContent) {
         weatherRightContent.forEach(content => {
             content.style.filter = 'blur(8px)';
-            content.style.pointerEvents = 'none'; // Disable interaction
-            content.classList.add('blurred-area'); // Add a class for event listener
+            content.style.pointerEvents = 'none';
+            content.classList.add('blurred-area');
         });
     }
 }
@@ -134,15 +120,29 @@ function applyBlur() {
 // Remove blur from all elements
 function removeBlur() {
     const blurredElements = document.querySelectorAll('.weather-left, .weather-right > *, .day-forecast, .hourly-forecast');
-
     blurredElements.forEach(element => {
-        element.style.filter = 'none'; // Remove blur
-        element.style.pointerEvents = 'auto'; // Re-enable interaction
+        element.style.filter = 'none';
+        element.style.pointerEvents = 'auto';
     });
 }
 
-// Apply the blur only if session is invalid
-checkSession();
+// Log out function to handle the logout button click
+// Log out function to handle the logout button click
+logoutBtn.addEventListener('click', () => {
+    fetch('assets/uservalidation/logout.php') // Call server-side logout
+        .then(response => {
+            if (response.ok) {
+                isLoggedIn = false; // Set login state to false
+                updateAuthButtons(); // Update button visibility
+                applyBlur(); // Reapply blur effect
+                alert('Logged out'); // Optional message
+            } else {
+                console.error("Logout failed");
+            }
+        })
+        .catch(error => console.error('Error during logout:', error));
+});
+
 
 // Check session on page load
 window.onload = function () {
