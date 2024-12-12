@@ -1,6 +1,6 @@
-<?php 
+<?php
 session_start();
-include('db_connect.php'); // Connect to the database
+include('db_connect.php'); // Database connection
 
 // Load Composer's autoloader
 require __DIR__ . '/../../vendor/autoload.php';
@@ -10,59 +10,71 @@ use PHPMailer\PHPMailer\Exception;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_BCRYPT); // Hash password
+    $password = password_hash($_POST['password'], PASSWORD_BCRYPT); // Hash the password
 
     // Check if email is a valid Gmail address
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/@gmail\.com$/', $email)) {
         $error = "Please enter a valid Gmail address (e.g., example@gmail.com).";
     } else {
-        // Generate a verification code
-        $verification_code = rand(100000, 999999);
-        $verification_status = 0; // 0 = not verified, 1 = verified
+        // Check for duplicate email
+        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-        // Insert new user into the database with verification status and code
-        $query = "INSERT INTO users (email, password, verification_code, verification_status) 
-                  VALUES ('$email', '$password', '$verification_code', '$verification_status')";
-
-        if (mysqli_query($conn, $query)) {
-            // Create a new PHPMailer instance
-            $mail = new PHPMailer(true);
-
-            try {
-                // Server settings
-                $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com'; // Specify your SMTP server
-                $mail->SMTPAuth = true;
-                $mail->Username = 'skycast321@gmail.com'; // Your SMTP username
-                $mail->Password = 'vglj bzpm yypd nkmm'; // Your SMTP password
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port = 587; // TCP port to connect to
-
-                // Recipients
-                $mail->setFrom('skycast321@gmail.com', 'Sky-Cast');
-                $mail->addAddress($email); // Add recipient
-
-                // Content
-                $mail->isHTML(true); // Set email format to HTML
-                $mail->Subject = 'Verify Your Email';
-                $mail->Body    = "Your verification code is: <h2><b>$verification_code</b></h2>";
-                $mail->AltBody = "Your verification code is: $verification_code"; // For non-HTML clients
-
-                // Send email
-                if ($mail->send()) {
-                    // Redirect to the verify page after sending the email
-                    header("Location: verify.php?email=" . urlencode($email));
-                    exit();
-                } else {
-                    echo "Error sending verification email.";
-                }
-            } catch (Exception $e) {
-                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-            }
+        if ($result->num_rows > 0) {
+            $error = "Email is already registered. Please use a different email.";
         } else {
-            // Handle signup error
-            $error = "Error signing up. Please try again later.";
+            // Generate a verification code
+            $verification_code = rand(100000, 999999);
+            $verification_status = 0; // 0 = not verified
+
+            // Insert new user into the database
+            $stmt = $conn->prepare("INSERT INTO users (email, password, verification_code, verification_status) 
+                                    VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("sssi", $email, $password, $verification_code, $verification_status);
+
+            if ($stmt->execute()) {
+                // Create a new PHPMailer instance
+                $mail = new PHPMailer(true);
+
+                try {
+                    // Server settings
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com'; // Your SMTP server
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'skycast321@gmail.com'; // Your SMTP username
+                    $mail->Password = 'vglj bzpm yypd nkmm'; // Your SMTP password
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port = 587;
+
+                    // Recipients
+                    $mail->setFrom('skycast321@gmail.com', 'Sky-Cast');
+                    $mail->addAddress($email); // Add recipient
+
+                    // Content
+                    $mail->isHTML(true); // Set email format to HTML
+                    $mail->Subject = 'Verify Your Email';
+                    $mail->Body = "Your verification code is: <h2><b>$verification_code</b></h2>";
+                    $mail->AltBody = "Your verification code is: $verification_code"; // For non-HTML clients
+
+                    // Send email
+                    if ($mail->send()) {
+                        // Redirect to the verify page
+                        header("Location: verify.php?email=" . urlencode($email));
+                        exit();
+                    } else {
+                        $error = "Error sending verification email.";
+                    }
+                } catch (Exception $e) {
+                    $error = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                }
+            } else {
+                $error = "Error signing up. Please try again later.";
+            }
         }
+
+        $stmt->close();
     }
 }
 ?>
@@ -135,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="signup-container">
         <h2>Signup</h2>
         <form method="POST" action="signup.php">
-            <input type="text" name="email" placeholder="Gmail Address" required> 
+            <input type="text" name="email" placeholder="Gmail Address" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Signup</button>
         </form>

@@ -2,30 +2,43 @@
 session_start();
 include('db_connect.php'); // Connect to the database
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+// Check if email is passed via GET or session
+if (isset($_GET['email'])) {
     $email = $_GET['email'];
+    $_SESSION['email'] = $email; // Store in session for safety
+} elseif (isset($_SESSION['email'])) {
+    $email = $_SESSION['email'];
+} else {
+    die("No email provided for verification.");
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $entered_code = $_POST['verification_code'];
 
-    // Fetch the correct verification code from the database
-    $query = "SELECT verification_code FROM users WHERE email = '$email'";
-    $result = mysqli_query($conn, $query);
-    $row = mysqli_fetch_assoc($result);
+    // Use prepared statements to fetch the verification code
+    $stmt = $conn->prepare("SELECT verification_code FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
 
     if ($row && $entered_code == $row['verification_code']) {
-        // Update verification status
-        $update_query = "UPDATE users SET verification_status = 1 WHERE email = '$email'";
-        mysqli_query($conn, $update_query);
-        $message = "Email verified successfully!";
-        
-        // Redirect to login.php after a short delay
-        header("Location: login.php");
-        exit();
+        // Use prepared statements to update verification status
+        $update_stmt = $conn->prepare("UPDATE users SET verification_status = 1 WHERE email = ?");
+        $update_stmt->bind_param("s", $email);
+        if ($update_stmt->execute()) {
+            $message = "Email verified successfully!";
+            // Redirect to login.php after a short delay
+            header("Location: login.php");
+            exit();
+        } else {
+            $message = "Failed to update verification status. Please try again.";
+        }
     } else {
         $message = "Invalid verification code.";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #1f1f1f; /* Dark background matching signup page */
+            background-color: #1f1f1f; /* Dark background */
             color: #ffffff; /* Light text color */
             display: flex;
             justify-content: center;
@@ -47,27 +60,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background-color: #2d2d2d; /* Darker container background */
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-            width: 300px; /* Fixed width for the form */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+            width: 300px;
             text-align: center;
         }
         h2 {
             margin-bottom: 20px;
-            color: #ffffff; /* Make header text white */
+            color: #ffffff; /* Header text color */
         }
         input[type="text"] {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
-            border: 1px solid #444; /* Darker border to match the theme */
+            border: 1px solid #444; /* Border for inputs */
             border-radius: 5px;
-            background-color: #333; /* Dark background for inputs */
-            color: #ffffff; /* Light text inside inputs */
+            background-color: #333; /* Input background */
+            color: #ffffff; /* Input text color */
         }
         button {
             width: 100%;
             padding: 10px;
-            background-color: #f4511e; /* Match the orange button color from signup page */
+            background-color: #f4511e; /* Button color */
             border: none;
             border-radius: 5px;
             color: #fff;
@@ -76,12 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #d63e00; /* Slightly darker orange on hover */
+            background-color: #d63e00; /* Button hover color */
         }
         .message {
             text-align: center;
             margin-top: 15px;
-            color: red; /* Error message color */
+            color: red; /* Message color */
         }
     </style>
 </head>
@@ -89,9 +102,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="container">
         <h2>Verify Email</h2>
         <?php if (isset($message)) : ?>
-            <div class="message"><?php echo $message; ?></div>
+            <div class="message"><?php echo htmlspecialchars($message); ?></div>
         <?php endif; ?>
-        <form method="POST" action="verify.php?email=<?php echo urlencode($_GET['email']); ?>">
+        <form method="POST" action="verify.php">
             <input type="text" name="verification_code" placeholder="Verification Code" required>
             <button type="submit">Verify</button>
         </form>
