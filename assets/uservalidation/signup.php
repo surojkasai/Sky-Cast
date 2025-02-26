@@ -141,6 +141,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: red;
             margin-bottom: 15px;
         }
+
+        .login-link {
+            margin-top: 15px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #f4511e;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -154,6 +170,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <?php if (isset($error)): ?>
             <p class="error"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
+        
+        <p class="login-link">
+            Already have an account? <a href="login.php">Login</a>
+        </p>
     </div>
 </body>
 </html>

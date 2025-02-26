@@ -21,14 +21,8 @@
     <div class="container">
         <div class="header">
             <h2>Sky-Cast</h2>
-            <div class="auth-buttons">
-                <button id="loginBtn">Login</button>
-                <button id="signupBtn">Sign Up</button>
-                <button id="logoutBtn" style="display: none;">Logout</button>
-            </div>
             <div class="weather-input">
                 <input type="text" name="city" id="city_input" placeholder="Enter a city name">
-                
                 <button type="button" id="searchBtn">
                     <i class="fa-regular fa-search"></i> Search
                 </button>
@@ -36,7 +30,63 @@
                     <i class="bx bx-target-lock"></i>Current Location
                 </button>
             </div>
+           
+            <div class="profile-menu">
+                <div class="profile-icon">
+                    <img src="https://via.placeholder.com/32" alt="Profile">
+                </div>
+                <div class="auth-buttons">
+                    <button id="signupBtn">SignUp</button>
+                    <button id="loginBtn">Login</button>
+                    <button id="logoutBtn" style="display: none;">Logout</button>
+                    <label for="avatarUpload" class="button-style">Edit</label>
+                    <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                </div>
+            </div>
+            <script>
+                document.getElementById('avatarUpload').addEventListener('change', function (event) {
+    const file = event.target.files[0]; // Get the selected file
+    if (file) {
+        const reader = new FileReader(); // Create a FileReader to read the file
+        reader.onload = function (e) {
+            const profileIcon = document.querySelector('.profile-icon img'); // Select the profile icon image
+            profileIcon.src = e.target.result; // Set the new image source
+        };
+        reader.readAsDataURL(file); // Read the file as a Data URL
+    }
+});
+
+            </script>
+           <!--- <script>
+                document.getElementById('avatarUpload').addEventListener('change', function (event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const formData = new FormData();
+                        formData.append('avatar', file);
+            
+                        // Replace 'upload.php' with the path to your PHP file
+                        fetch('upload.php', {
+                            method: 'POST',
+                            body: formData,
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const profileIcon = document.querySelector('.profile-icon img');
+                                    profileIcon.src = data.imageUrl; // Update the profile image with the uploaded image URL
+                                } else {
+                                    alert('Error uploading image: ' + data.error);
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                });
+            </script>-->
+            
+            
+
         </div>
+        
         <div class="weather-data">
             <div class="weather-left">
                 <div class="card">
@@ -275,6 +325,7 @@
     <script src="https://momentjs.com/downloads/moment.min.js"></script>
     <script src="assets\js\api.js"></script>
     <script src="assets\js\route.js"></script>
+    <!--<script src="avatarup.php"></script>-->
 
 </body>
 

@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['email'] = $user['email']; // Set session variable
         
         // Redirect to the full weather page after successful login
-        header("Location:/SKYB/index.html");
+        header("Location:/SKYB-2.0/index.html");
         exit();  // Important to stop script execution after redirect
     } else {
         $error = "No account found with this email or incorrect password.";
@@ -68,30 +68,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         button {
-    width: 100%;
-    padding: 10px;
-    background-color: #f4511e;
-    border: none;
-    border-radius: 5px;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 20px; /* Add space between email input and button */
-}
-
+            width: 100%;
+            padding: 10px;
+            background-color: #f4511e;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
 
         button:hover {
             background-color: #d63e00;
         }
 
-        .forgot-password {
+        .signup-link {
             margin-top: 15px;
-            display: inline-block;
             color: #ffffff;
+            display: inline-block;
+            font-size: 14px;
         }
 
-        .forgot-password:hover {
+        .signup-link a {
+            color: #f4511e;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .signup-link a:hover {
             text-decoration: underline;
         }
 
@@ -113,31 +119,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <button type="submit">Login</button>
         </form>
 
-        <!-- Add Forgot Password Link -->
-        <a href="#" class="forgot-password" id="forgotPasswordLink">Forgot your password?</a>
+        <!-- Change "Forgot your password?" to "Create an Account Signup" -->
+        <p class="signup-link">
+            Don't have an account? <a href="signup.php">Sign up</a>
+        </p>
     </div>
-
-   <!-- Forgot Password Modal -->
-<div id="forgotPasswordModal" style="display:none;">
-    <div class="login-container">
-        <h2>Reset Password</h2>
-        <form method="POST" action="forgot_password.php">
-            <input type="email" name="email" placeholder="Enter your email" required>
-            <button type="submit">Send Reset Link</button>
-        </form>
-    </div>
-</div>
-
-
-    <script>
-        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
-
-        forgotPasswordLink.addEventListener('click', function() {
-            // Hide the login form and show the forgot password form
-            document.querySelector('.login-container').style.display = 'none';
-            forgotPasswordModal.style.display = 'block';
-        });
-    </script>
 </body>
 </html>

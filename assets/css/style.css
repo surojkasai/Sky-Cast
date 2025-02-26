@@ -48,6 +48,8 @@ hr {
             outline: none;
         }
     }
+    
+    
     .modal {
         display: none; /* Hidden by default */
         position: fixed; /* Stay in place */
@@ -84,32 +86,75 @@ hr {
     }
     
     
-    .auth-buttons {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
+    .profile-menu {
+        position: relative;
+        display: inline-block;
     }
     
-    .auth-buttons button {
+    .profile-icon {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+    
+    .profile-icon img {
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .profile-icon:hover img {
+        transform: scale(1.1); /* Add a subtle hover effect */
+    }
+    
+    .auth-buttons {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
         background-color: #333333;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        border-radius: 5px;
+        padding: 10px;
+        z-index: 10;
+        transition: opacity 0.3s ease;
+    }
+    
+    .auth-buttons button,
+    .auth-buttons .button-style {
+        display: block;
+        width: 100%;
+        background-color: #444444;
         color: white;
         border: none;
         border-radius: 5px;
-        padding: 10px 20px;
-        font-size: 16px;
-        margin: 0 10px;
+        padding: 10px;
+        margin-bottom: 5px;
         cursor: pointer;
+        text-align: left;
         transition: background-color 0.3s, transform 0.2s;
+        font-size: 14px;
+        text-align: center;
     }
     
-    .auth-buttons button:hover {
+    .auth-buttons button:hover,
+    .auth-buttons .button-style:hover {
         background-color: #161313;
         transform: scale(1.05);
     }
     
-    .auth-buttons button:active {
+    .auth-buttons button:active,
+    .auth-buttons .button-style:active {
         transform: scale(0.95);
     }
+    
+    
+    .profile-menu:hover .auth-buttons {
+        display: block;
+        opacity: 1;
+    }
+    
     
     #searchBtn {
         border: none;

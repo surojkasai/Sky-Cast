@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropdown Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            position: relative;
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .profile-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-icon {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .profile-icon img {
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 200px;
+            z-index: 10;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .dropdown a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .profile-menu:hover .dropdown {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="profile-menu">
+            <div class="profile-icon">
+                <img src="https://via.placeholder.com/32" alt="Profile">
+            </div>
+            <div class="dropdown">
+                <p style="padding: 10px; margin: 0; font-weight: bold;">Signed in as <br><span style="font-weight: normal;">ankitkante</span></p>
+                <a href="#">Your profile</a>
+                <a href="#">Your stars</a>
+                <a href="#">Your Gists</a>
+                <a href="#">Help</a>
+                <a href="#">Settings</a>
+                <a href="#">Sign out</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
