@@ -4,23 +4,28 @@ include('db_connect.php');
 
 // Check if the form was submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username']; // Get username input
     $email = $_POST['email'];
     $password = $_POST['password'];
 
     // Check if the user exists in the database
-    $query = "SELECT * FROM users WHERE email='$email'";
-    $result = mysqli_query($conn, $query);
-    $user = mysqli_fetch_assoc($result);
+    $query = "SELECT username, email, password FROM users WHERE username = ? AND email = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ss", $username, $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
 
     // If user exists and password matches
     if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['email'] = $user['email']; // Set session variable
+        $_SESSION['username'] = $user['username']; // Store username in session
+        $_SESSION['email'] = $user['email'];  // Store email in session
         
         // Redirect to the full weather page after successful login
-        header("Location:/SKYB-2.0/index.html");
+        header("Location: /SKYB-2.0/index.html");
         exit();  // Important to stop script execution after redirect
     } else {
-        $error = "No account found with this email or incorrect password.";
+        $error = "Invalid username, email, or password.";
     }
 }
 ?>
@@ -57,6 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             color: #ffffff;
         }
 
+        .input-container {
+            position: relative;
+            width: 100%;
+        }
+
         input[type="text"], input[type="password"] {
             width: 100%;
             padding: 10px;
@@ -65,6 +75,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 5px;
             background-color: #333;
             color: #fff;
+            padding-right: 40px; /* Space for the eye icon */
+        }
+
+        .eye-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #aaa;
         }
 
         button {
@@ -114,15 +134,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <p class="error"><?php echo htmlspecialchars($error); ?></p>
         <?php endif; ?>
         <form method="POST" action="login.php">
+            <input type="text" name="username" placeholder="Username" required>
             <input type="text" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
+            
+            <div class="input-container">
+                <input type="password" id="password" name="password" placeholder="Password" required>
+                <span class="eye-icon" onclick="togglePassword()">👁️</span>
+            </div>
+
             <button type="submit">Login</button>
         </form>
 
-        <!-- Change "Forgot your password?" to "Create an Account Signup" -->
         <p class="signup-link">
             Don't have an account? <a href="signup.php">Sign up</a>
         </p>
     </div>
+
+    <script>
+        function togglePassword() {
+            var passwordField = document.getElementById("password");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+            } else {
+                passwordField.type = "password";
+            }
+        }
+    </script>
 </body>
 </html>
